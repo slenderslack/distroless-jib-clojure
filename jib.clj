@@ -1,4 +1,5 @@
 (ns jib
+  (:require [clojure.java.shell :as sh])
   (:import
    (com.google.cloud.tools.jib.api Jib
                                    DockerDaemonImage
@@ -75,12 +76,15 @@
                     :type :registry}
         target-image {:image-name "gcr.io/personalsdm-216019/distroless-jib-clojure" 
                       :authorizer {:fn 'gcloud/authorizer}
-                      :type :registry}
+                      :type :docker}
         entrypoint ["java" "-jar"]
         app-layer [(into-list (get-path standalone-jar))
                    (AbsoluteUnixPath/get "/")]]
     (println "Building container upon" (:image-name base-image) "with" standalone-jar)
     (-> (Jib/from (configure-image base-image))
+        (.addLabel "org.opencontainers.image.revision" (:out (sh/sh "git" "rev-parse" "HEAD")))
+        (.addLabel "org.opencontainers.image.source" "https://github.com/slenderslack/distroless-jib-clojure")
+        (.addLabel "com.atomist.containers.image.build" "jib.clj")
         (.addLayer (first app-layer) (second app-layer))
         (.setEntrypoint (apply into-list entrypoint))
         (.setProgramArguments (into-list "server-0.1.1-standalone.jar"))

@@ -2,5 +2,5 @@
   (:gen-class))
 
 (defn -main [& args]
-  (println "run " args))
+  (println "run server " args))
 
