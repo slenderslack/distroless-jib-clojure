@@ -13,3 +13,5 @@ Atomist will be scanning at this point.  Run the application.
 ```
 docker run --rm gcr.io/personalsdm-216019/distroless-jib-clojure:latest
 ```
+
+[gene-kim-gist]: https://gist.github.com/realgenekim/fdcad45286d065cc559cd75a8f946ad4#file-jib-build-clj-L45

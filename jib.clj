@@ -6,7 +6,11 @@
                                    Containerizer
                                    TarImage
                                    RegistryImage
-                                   ImageReference CredentialRetriever Credential)
+                                   ImageReference 
+                                   CredentialRetriever 
+                                   Credential
+                                   LayerConfiguration
+                                   LayerConfiguration$Builder)
    (com.google.cloud.tools.jib.api.buildplan AbsoluteUnixPath)
    (com.google.cloud.tools.jib.frontend
     CredentialRetrieverFactory)
@@ -76,17 +80,21 @@
                     :type :registry}
         target-image {:image-name "gcr.io/personalsdm-216019/distroless-jib-clojure" 
                       :authorizer {:fn 'gcloud/authorizer}
-                      :type :docker}
-        entrypoint ["java" "-jar"]
-        app-layer [(into-list (get-path standalone-jar))
-                   (AbsoluteUnixPath/get "/")]]
+                      :type :registry}
+        entrypoint ["java" "-jar"]]
     (println "Building container upon" (:image-name base-image) "with" standalone-jar)
     (-> (Jib/from (configure-image base-image))
         (.addLabel "org.opencontainers.image.revision" (:out (sh/sh "git" "rev-parse" "HEAD")))
         (.addLabel "org.opencontainers.image.source" "https://github.com/slenderslack/distroless-jib-clojure")
-        (.addLabel "com.atomist.containers.image.build" "jib.clj")
-        (.addLayer (first app-layer) (second app-layer))
+        (.addLabel "com.atomist.containers.image.build" "clj -T:jib jib-build")
+        (.addLayer (into-list (get-path standalone-jar)) (AbsoluteUnixPath/get "/"))
+        #_(.addLayer (-> (LayerConfiguration/builder)
+                       (.setName "Custom Java Layer")
+                       (.addEntry (get-path standalone-jar) (AbsoluteUnixPath/get "/"))
+                       (.build)))
         (.setEntrypoint (apply into-list entrypoint))
         (.setProgramArguments (into-list "server-0.1.1-standalone.jar"))
-        (.containerize (Containerizer/to (configure-image target-image))))))
+        (.containerize (-> (Containerizer/to (configure-image target-image))
+                           (.setToolName "clojure jib builder")
+                           (.setToolVersion "0.1.0"))))))
 
