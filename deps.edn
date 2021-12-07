@@ -1,6 +1,1 @@
-{:paths ["src"]
- :aliases
- {:build {:deps {io.github.clojure/tools.build {:tag "v0.6.8" :sha "d79ae84"}}
-          :ns-default build}
-  :jib {:deps {com.google.cloud.tools/jib-core {:mvn/version "0.20.0"}}
-        :ns-default jib }}}
+{:paths ["src"]}
