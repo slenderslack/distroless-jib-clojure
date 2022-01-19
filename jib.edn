@@ -1,0 +1,6 @@
+{:main atomist.server
+ :target-image {:type :registry
+                :image-name "slimslenderslacks/distroless-jib-clojure"
+                :tagger {:fn jibbit.tagger/tag}
+                :authorizer {:fn jibbit.creds/load-edn
+                             :args {:local "creds.edn"}}}}
